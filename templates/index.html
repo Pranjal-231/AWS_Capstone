@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>BookStore</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            background-color: #f1f3f6;
+        }
+
+        .navbar {
+            background: #2874f0;
+            padding: 15px;
+            color: white;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 15px;
+            font-weight: bold;
+        }
+
+        .book-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            width: 220px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        /* Pricing Styles */
+        .original-price {
+            text-decoration: line-through;
+            color: #878787;
+            font-size: 0.9em;
+            margin-right: 5px;
+        }
+
+        .final-price {
+            color: #212121;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        /* Badges */
+        .badge-offer {
+            background: #388e3c;
+            color: white;
+            padding: 2px 8px;
+            font-size: 0.7em;
+            border-radius: 3px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        /* NEW: Scarcity Badge (Hurry Up) */
+        .badge-hurry {
+            background: #ff6161;
+            color: white;
+            padding: 2px 8px;
+            font-size: 0.7em;
+            border-radius: 3px;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            animation: pulse 1.5s infinite;
+            /* Make it throb to grab attention */
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .badge-stock {
+            color: #ff6161;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-top: 5px;
+            display: block;
+        }
+
+        /* Buttons */
+        .btn {
+            display: block;
+            margin-top: 5px;
+            padding: 8px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .btn-cart {
+            background: #ff9f00;
+            color: white;
+        }
+
+        .btn-wish {
+            background: #e83e8c;
+            color: white;
+        }
+
+        .btn-disabled {
+            background: #e0e0e0;
+            color: #878787;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="navbar">
+        <span>📚 BookStore</span>
+        <div>
+            {% if role == 'guest' %}
+            <a href="/login">Login</a>
+            {% else %}
+            <a href="/wishlist">Wishlist</a>
+            <a href="/cart">Cart ({{ cart_count }})</a>
+            {% if role == 'admin' %}<a href="/admin">Admin</a>{% endif %}
+            <a href="/logout">Logout</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="book-container">
+        {% for book in books %}
+        <div class="card">
+
+            {% if book.stock > 0 and book.stock < 11 %} <span class="badge-hurry">🔥 Hurry Up! Few Left</span>
+                {% endif %}
+
+                {% if book.offer_text and book.stock >= 5 %}
+                <span class="badge-offer">{{ book.offer_text }}</span>
+                {% endif %}
+
+                <h3 style="margin-top: 25px;">{{ book.title }}</h3>
+                <p>{{ book.author }}</p>
+
+                <div>
+                    {% if book.sale_price %}
+                    <span class="original-price">₹{{ book.price }}</span>
+                    <span class="final-price">₹{{ book.sale_price }}</span>
+                    {% else %}
+                    <span class="final-price">₹{{ book.price }}</span>
+                    {% endif %}
+                </div>
+
+                {% if book.stock > 0 %}
+                <span class="badge-stock">Stock: {{ book.stock }}</span>
+                <a href="/add_to_cart/{{ book.title }}" class="btn btn-cart">Add to Cart</a>
+                {% else %}
+                <span class="badge-stock" style="color: gray;">Out of Stock</span>
+                <a href="#" class="btn btn-disabled">Sold Out</a>
+                {% endif %}
+
+                <a href="/add_to_wishlist/{{ book.title }}" class="btn btn-wish">Add to Wishlist</a>
+
+        </div>
+        {% else %}
+        <p>Store is empty.</p>
+        {% endfor %}
+    </div>
+
+</body>
+
+</html>

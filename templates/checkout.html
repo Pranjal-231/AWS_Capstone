@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Checkout</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 30px;
+            max-width: 600px;
+            margin: auto;
+            background-color: #f1f3f6;
+        }
+
+        .box {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 80px;
+            padding: 10px;
+            margin-top: 10px;
+            box-sizing: border-box;
+        }
+
+        .total-price {
+            font-size: 1.5em;
+            font-weight: bold;
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        .btn-confirm {
+            background-color: #fb641b;
+            color: white;
+            border: none;
+            padding: 15px;
+            width: 100%;
+            font-size: 1.2em;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .btn-confirm:hover {
+            background-color: #e35a17;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1 style="text-align: center;">Secure Checkout</h1>
+
+    <div class="total-price">Total to Pay: ₹{{ total }}</div>
+
+    <form action="/checkout" method="POST">
+
+        <div class="box">
+            <h2>📍 Delivery Address</h2>
+
+            {% if addresses %}
+            <p><b>Choose saved address:</b></p>
+            {% for addr in addresses %}
+            <label>
+                <input type="radio" name="selected_address" value="{{ addr }}">
+                {{ addr }}
+            </label>
+            {% endfor %}
+            <hr>
+            {% endif %}
+
+            <p><b>Or add a new address:</b></p>
+            <textarea name="new_address" placeholder="Enter your full street address, city, and pincode..."></textarea>
+        </div>
+
+        <div class="box">
+            <h2>💳 Payment Mode</h2>
+            <label>
+                <input type="radio" name="payment_mode" value="UPI" checked> UPI (GPay / PhonePe)
+            </label>
+            <label>
+                <input type="radio" name="payment_mode" value="Credit/Debit Card"> Credit / Debit Card
+            </label>
+            <label>
+                <input type="radio" name="payment_mode" value="COD"> Cash on Delivery (COD)
+            </label>
+        </div>
+
+        <button type="submit" class="btn-confirm">Place Order</button>
+    </form>
+
+    <br>
+    <a href="/cart">Back to Cart</a>
+
+</body>
+
+</html>
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Checkout</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 30px;
+            max-width: 600px;
+            margin: auto;
+            background-color: #f1f3f6;
+        }
+
+        .box {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 80px;
+            padding: 10px;
+            margin-top: 10px;
+            box-sizing: border-box;
+        }
+
+        .total-price {
+            font-size: 1.5em;
+            font-weight: bold;
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        .btn-confirm {
+            background-color: #fb641b;
+            color: white;
+            border: none;
+            padding: 15px;
+            width: 100%;
+            font-size: 1.2em;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .btn-confirm:hover {
+            background-color: #e35a17;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1 style="text-align: center;">Secure Checkout</h1>
+
+    <div class="total-price">Total to Pay: ₹{{ total }}</div>
+
+    <form action="/checkout" method="POST">
+
+        <div class="box">
+            <h2>📍 Delivery Address</h2>
+
+            {% if addresses %}
+            <p><b>Choose saved address:</b></p>
+            {% for addr in addresses %}
+            <label>
+                <input type="radio" name="selected_address" value="{{ addr }}">
+                {{ addr }}
+            </label>
+            {% endfor %}
+            <hr>
+            {% endif %}
+
+            <p><b>Or add a new address:</b></p>
+            <textarea name="new_address" placeholder="Enter your full street address, city, and pincode..."></textarea>
+        </div>
+
+        <div class="box">
+            <h2>💳 Payment Mode</h2>
+            <label>
+                <input type="radio" name="payment_mode" value="UPI" checked> UPI (GPay / PhonePe)
+            </label>
+            <label>
+                <input type="radio" name="payment_mode" value="Credit/Debit Card"> Credit / Debit Card
+            </label>
+            <label>
+                <input type="radio" name="payment_mode" value="COD"> Cash on Delivery (COD)
+            </label>
+        </div>
+
+        <button type="submit" class="btn-confirm">Place Order</button>
+    </form>
+
+    <br>
+    <a href="/cart">Back to Cart</a>
+
+</body>
+
+</html>

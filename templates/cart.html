@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>My Cart</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 50px;
+            max-width: 900px;
+            margin: auto;
+            background-color: #f1f3f6;
+        }
+
+        h1 {
+            background: white;
+            padding: 20px;
+            margin: 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        th {
+            background-color: #f8f9fa;
+            text-align: left;
+            padding: 15px;
+            color: #878787;
+            font-weight: normal;
+            font-size: 0.9em;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            vertical-align: middle;
+        }
+
+        .qty-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-qty {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 1px solid #c2c2c2;
+            background: white;
+            color: black;
+            font-weight: bold;
+            text-align: center;
+            line-height: 28px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-qty:hover {
+            border-color: black;
+            background-color: #f0f0f0;
+        }
+
+        .qty-number {
+            width: 40px;
+            text-align: center;
+            border: 1px solid #c2c2c2;
+            padding: 5px;
+            font-weight: bold;
+        }
+
+        .price {
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        .total-section {
+            background: white;
+            padding: 20px;
+            text-align: right;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-checkout {
+            background-color: #fb641b;
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: bold;
+            font-size: 1.1em;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-remove {
+            color: #212121;
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 0.9em;
+            text-transform: uppercase;
+        }
+
+        .btn-remove:hover {
+            color: #fb641b;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🛒 Shopping Cart</h1>
+
+    {% if cart %}
+    <table>
+        <tr>
+            <th>Item Details</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Subtotal</th>
+            <th>Action</th>
+        </tr>
+        {% for item in cart %}
+        <tr>
+            <td>
+                <b>{{ item.title }}</b><br>
+                <span style="color: #878787; font-size: 0.9em;">{{ item.author }}</span>
+            </td>
+            <td class="price">₹{{ item.price }}</td>
+
+            <td>
+                <div class="qty-box">
+                    <a href="/decrease_quantity/{{ item.title }}" class="btn-qty"
+                        style="color: {{ 'gray' if item.quantity == 1 else 'black' }}">-</a>
+
+                    <div class="qty-number">{{ item.quantity }}</div>
+
+                    <a href="/increase_quantity/{{ item.title }}" class="btn-qty">+</a>
+                </div>
+            </td>
+
+            <td class="price">₹{{ item.price * item.quantity }}</td>
+            <td><a href="/remove_from_cart/{{ item.title }}" class="btn-remove">Remove</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <div class="total-section">
+        <span style="font-size: 1.5em; margin-right: 20px;">Total Amount: <b>₹{{ total }}</b></span>
+        <a href="/checkout" class="btn-checkout">PLACE ORDER</a>
+    </div>
+
+    {% else %}
+    <div style="background: white; padding: 50px; text-align: center;">
+        <p>Your cart is empty!</p>
+        <a href="/" style="background-color: #2874f0; color: white; padding: 10px 20px; text-decoration: none;">Shop
+            Now</a>
+    </div>
+    {% endif %}
+
+    <br>
+    <a href="/" style="text-decoration: none; color: #2874f0; margin-left: 20px;">← Continue Shopping</a>
+
+</body>
+
+</html>

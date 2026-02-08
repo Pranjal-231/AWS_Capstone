@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; background: #f4f4f4; }
+        .container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        input { width: 100%; padding: 10px; margin: 5px 0 15px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        label { font-weight: bold; display: block; margin-top: 10px; }
+        button { background-color: #28a745; color: white; padding: 12px; width: 100%; border: none; font-size: 1.1em; cursor: pointer; }
+        .row { display: flex; gap: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Admin Dashboard</h1>
+        <p>Add new inventory to the store.</p>
+        
+        <form action="/add_book" method="POST">
+            
+            <label>Book Title</label>
+            <input type="text" name="title" required placeholder="e.g. Atomic Habits">
+            
+            <label>Author</label>
+            <input type="text" name="author" required placeholder="e.g. James Clear">
+            
+            <div class="row">
+                <div style="flex:1;">
+                    <label>Original Price (₹)</label>
+                    <input type="number" name="price" required placeholder="500">
+                </div>
+                <div style="flex:1;">
+                    <label>Sale Price (Optional)</label>
+                    <input type="number" name="sale_price" placeholder="450">
+                </div>
+            </div>
+
+            <div class="row">
+                <div style="flex:1;">
+                    <label>Stock Quantity</label>
+                    <input type="number" name="stock" required placeholder="10">
+                </div>
+                <div style="flex:1;">
+                    <label>Offer Label (Optional)</label>
+                    <input type="text" name="offer_text" placeholder="e.g. Best Seller">
+                </div>
+            </div>
+            
+            <button type="submit">Add Book</button>
+        </form>
+        
+        <br>
+        <a href="/" style="display:block; text-align:center;">Go to Store</a>
+    </div>
+</body>
+</html>

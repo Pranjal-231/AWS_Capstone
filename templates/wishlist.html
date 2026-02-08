@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Wishlist</title>
+    <style>
+        body { font-family: sans-serif; padding: 50px; max-width: 800px; margin: auto; }
+        .item { border-bottom: 1px solid #ddd; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .btn-cart { background: #ffc107; color: black; padding: 8px 15px; text-decoration: none; border-radius: 5px; }
+        .btn-remove { color: red; margin-left: 10px; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <h1>❤️ My Wishlist</h1>
+
+    {% if wishlist %}
+        {% for book in wishlist %}
+        <div class="item">
+            <div>
+                <h3>{{ book.title }}</h3>
+                <p>by {{ book.author }} - <b>₹{{ book.price }}</b></p>
+            </div>
+            <div>
+                <a href="/add_to_cart/{{ book.title }}" class="btn-cart">Move to Cart</a>
+                <a href="/remove_from_wishlist/{{ book.title }}" class="btn-remove">Remove</a>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>Your wishlist is empty. <a href="/">Go add some books!</a></p>
+    {% endif %}
+
+    <br>
+    <a href="/">← Back to Store</a>
+
+</body>
+</html>
