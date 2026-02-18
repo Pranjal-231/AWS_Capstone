@@ -8,8 +8,7 @@ books_db = []
 cart_db = []       
 wishlist_db = []   
 
-# Users Database: Stores email, password, and addresses
-# Format: { 'email': {'password': '123', 'addresses': []} }
+
 users_db = {} 
 
 # --- HELPER ---
@@ -27,7 +26,7 @@ def home():
     total_qty = sum(item['quantity'] for item in cart_db)
     return render_template("index.html", books=books_db, cart_count=total_qty, role=user_role)
 
-# --- AUTHENTICATION (FIXED) ---
+
 
 @app.route("/signup", methods=['GET', 'POST'])
 def signup_page():
