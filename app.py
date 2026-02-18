@@ -7,6 +7,9 @@ app.secret_key = "my_secret_key"
 books_db = []      
 cart_db = []       
 wishlist_db = []   
+
+# Users Database: Stores email, password, and addresses
+# Format: { 'email': {'password': '123', 'addresses': []} }
 users_db = {} 
 
 # --- HELPER ---
@@ -24,73 +27,106 @@ def home():
     total_qty = sum(item['quantity'] for item in cart_db)
     return render_template("index.html", books=books_db, cart_count=total_qty, role=user_role)
 
+# --- AUTHENTICATION (FIXED) ---
+
+@app.route("/signup", methods=['GET', 'POST'])
+def signup_page():
+    if request.method == 'POST':
+        # 1. Get data from form
+        name = request.form['name']
+        email = request.form['email']
+        password = request.form['password']
+        
+        # 2. Check if user already exists
+        if email in users_db:
+            return "<h1>Error: User already exists!</h1> <a href='/login'>Login</a>"
+            
+        # 3. Save User to DB
+        users_db[email] = {
+            'password': password,
+            'name': name,
+            'addresses': []
+        }
+        
+        return redirect(url_for('login_page'))
+        
+    return render_template("signup.html")
+
+@app.route("/login", methods=['GET', 'POST'])
+def login_page():
+    error = None
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        
+        # 1. CHECK ADMIN
+        if email == "admin@bookstore.com":
+            if password == "admin123":
+                session['role'] = 'admin'
+                return redirect(url_for('admin_page'))
+            else:
+                return "<h1>Wrong Admin Password!</h1> <a href='/login'>Try Again</a>"
+            
+        # 2. CHECK NORMAL USER
+        if email in users_db:
+            # Check if password matches the one stored in users_db
+            if users_db[email]['password'] == password:
+                session['role'] = 'user'
+                session['user_email'] = email
+                return redirect(url_for('home'))
+            else:
+                return "<h1>Wrong Password!</h1> <a href='/login'>Try Again</a>"
+        else:
+            return "<h1>User not found! Please Sign Up first.</h1> <a href='/signup'>Sign Up</a>"
+            
+    return render_template("login.html")
+
+@app.route("/logout")
+def logout():
+    session.clear() 
+    return redirect(url_for('login_page'))
+
 # --- ADMIN ---
 @app.route("/admin")
 def admin_page():
-    if session.get('role') != 'admin': return "Access Denied"
+    if session.get('role') != 'admin': return "<h1>Access Denied</h1>"
     return render_template("admin.html")
 
 @app.route("/add_book", methods=['POST'])
 def add_book():
     if session.get('role') != 'admin': return redirect(url_for('home'))
     
-    # 1. Capture Basic Info
     title = request.form['title']
     author = request.form['author']
     original_price = int(request.form['price'])
-    
-    # 2. Capture New Features (Stock, Sale, Offer)
     stock = int(request.form['stock'])
-    offer_text = request.form.get('offer_text', '') # Optional text like "50% Off"
+    offer_text = request.form.get('offer_text', '') 
     
-    # Check if there is a Sale Price (Empty string means NO sale)
     sale_input = request.form.get('sale_price')
     sale_price = int(sale_input) if sale_input else None
     
-    # 3. Save to DB
     new_book = {
-        "title": title, 
-        "author": author, 
-        "price": original_price,
-        "sale_price": sale_price,  # If this exists, it overrides price
-        "stock": stock,
-        "offer_text": offer_text
+        "title": title, "author": author, "price": original_price,
+        "sale_price": sale_price, "stock": stock, "offer_text": offer_text
     }
     books_db.append(new_book)
-    
     return redirect(url_for('admin_page'))
 
-# --- CART LOGIC (Updated for Stock & Sale Price) ---
-
+# --- CART LOGIC ---
 @app.route("/add_to_cart/<book_title>")
 def add_to_cart(book_title):
     if 'role' not in session: return redirect(url_for('login_page'))
     
     book = get_book_by_title(book_title)
-    
-    # 1. Check Stock
-    if not book or book['stock'] <= 0:
-        return "<h1>Error: Out of Stock</h1> <a href='/'>Back</a>"
-
-    # 2. Determine Final Price (Sale vs Original)
+    if not book or book['stock'] <= 0: return "<h1>Out of Stock</h1> <a href='/'>Back</a>"
     final_price = book['sale_price'] if book['sale_price'] else book['price']
 
-    # 3. Add to Cart
     for item in cart_db:
         if item['title'] == book_title:
-            # Check if adding one more exceeds stock
-            if item['quantity'] + 1 > book['stock']:
-                return "<h1>Error: Not enough stock available!</h1> <a href='/'>Back</a>"
-            item['quantity'] += 1
-            return redirect(url_for('home'))
+            if item['quantity'] + 1 > book['stock']: return "<h1>Not enough stock!</h1> <a href='/'>Back</a>"
+            item['quantity'] += 1; return redirect(url_for('home'))
             
-    # New Item
-    cart_db.append({
-        "title": book['title'], 
-        "author": book['author'], 
-        "price": final_price, 
-        "quantity": 1
-    })
+    cart_db.append({"title": book['title'], "author": book['author'], "price": final_price, "quantity": 1})
     return redirect(url_for('home'))
 
 @app.route("/cart")
@@ -99,45 +135,40 @@ def view_cart():
     total_price = sum(item['price'] * item['quantity'] for item in cart_db)
     return render_template("cart.html", cart=cart_db, total=total_price)
 
-# --- CHECKOUT (Reduces Stock) ---
+# --- CHECKOUT ---
 @app.route("/checkout", methods=['GET', 'POST'])
 def checkout():
     if 'role' not in session: return redirect(url_for('login_page'))
     
     email = session.get('user_email')
-    if email not in users_db: users_db[email] = {'addresses': []} # Safety check
+    # Safety Check: If server restarted, user might be logged in but not in DB
+    if email not in users_db: users_db[email] = {'addresses': [], 'password': 'temp_password'} 
 
     user_addresses = users_db[email]['addresses']
     total_price = sum(item['price'] * item['quantity'] for item in cart_db)
     
     if request.method == 'POST':
-        # 1. Handle Address & Payment
-        selected_address = request.form.get('selected_address') or request.form.get('new_address')
-        if request.form.get('new_address'):
-             users_db[email]['addresses'].append(request.form.get('new_address'))
+        selected_addr = request.form.get('selected_address') or request.form.get('new_address')
+        if request.form.get('new_address'): users_db[email]['addresses'].append(request.form.get('new_address'))
         payment_mode = request.form['payment_mode']
         
-        # 2. CRITICAL: REDUCE STOCK from Main Inventory
+        # Reduce Stock
         for cart_item in cart_db:
             for book in books_db:
-                if book['title'] == cart_item['title']:
-                    book['stock'] -= cart_item['quantity']
+                if book['title'] == cart_item['title']: book['stock'] -= cart_item['quantity']
         
-        # 3. Clear Cart
         cart_db.clear()
-        return render_template("order_success.html", address=selected_address, payment=payment_mode)
+        return render_template("order_success.html", address=selected_addr, payment=payment_mode)
 
     return render_template("checkout.html", addresses=user_addresses, total=total_price)
 
-# --- OTHER ROUTES (Standard) ---
+# --- OTHER ROUTES ---
 @app.route("/increase_quantity/<book_title>")
 def increase_quantity(book_title):
-    book_in_inventory = get_book_by_title(book_title)
+    book_inv = get_book_by_title(book_title)
     for item in cart_db:
         if item['title'] == book_title:
-            # Don't let user buy more than available stock
-            if item['quantity'] + 1 <= book_in_inventory['stock']:
-                item['quantity'] += 1
+            if item['quantity'] + 1 <= book_inv['stock']: item['quantity'] += 1
             break
     return redirect(url_for('view_cart'))
 
@@ -161,28 +192,24 @@ def view_wishlist(): return render_template("wishlist.html", wishlist=wishlist_d
 @app.route("/add_to_wishlist/<book_title>")
 def add_to_wishlist(book_title):
     if 'role' not in session: return redirect(url_for('login_page'))
+    
+    # 1. Check if book is ALREADY in wishlist
+    for item in wishlist_db:
+        if item['title'] == book_title:
+            
+            return redirect(url_for('home'))
+
+    
     book = get_book_by_title(book_title)
-    if book: wishlist_db.append(book)
+    if book: 
+        wishlist_db.append(book)
+        
     return redirect(url_for('home'))
 @app.route("/remove_from_wishlist/<book_title>")
 def remove_from_wishlist(book_title):
     global wishlist_db
     wishlist_db = [item for item in wishlist_db if item['title'] != book_title]
     return redirect(url_for('view_wishlist'))
-@app.route("/login", methods=['GET', 'POST'])
-def login_page():
-    if request.method == 'POST':
-        email, pwd = request.form['email'], request.form['password']
-        if email == "p@123.com" and pwd == "123":
-            session['role'] = 'admin'; return redirect(url_for('admin_page'))
-        session['role'] = 'user'; session['user_email'] = email
-        if email not in users_db: users_db[email] = {'addresses': []}
-        return redirect(url_for('home'))
-    return render_template("login.html")
-@app.route("/logout")
-def logout(): session.clear(); return redirect(url_for('login_page'))
-@app.route("/signup")
-def signup_page(): return render_template("signup.html")
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)

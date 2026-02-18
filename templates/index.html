@@ -160,6 +160,9 @@
                 {% if book.offer_text and book.stock >= 5 %}
                 <span class="badge-offer">{{ book.offer_text }}</span>
                 {% endif %}
+                {% if book.offer_text and book.stock > 10 %}
+                    <span class="badge-offer">{{ book.offer_text }}</span>
+                {% endif %}
 
                 <h3 style="margin-top: 25px;">{{ book.title }}</h3>
                 <p>{{ book.author }}</p>
@@ -174,7 +177,12 @@
                 </div>
 
                 {% if book.stock > 0 %}
-                <span class="badge-stock">Stock: {{ book.stock }}</span>
+                {% if book.stock <= 10 %}
+                    <span class="badge-stock" style="color: #e35a17;">Only {{ book.stock }} left!</span>
+                {% else %}
+                    <span class="badge-stock" style="color: green;">In Stock</span>
+                {% endif %}
+                
                 <a href="/add_to_cart/{{ book.title }}" class="btn btn-cart">Add to Cart</a>
                 {% else %}
                 <span class="badge-stock" style="color: gray;">Out of Stock</span>

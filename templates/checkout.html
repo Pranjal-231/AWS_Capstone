@@ -1,238 +1,88 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <title>Checkout</title>
     <style>
-        body {
-            font-family: sans-serif;
-            padding: 30px;
-            max-width: 600px;
-            margin: auto;
-            background-color: #f1f3f6;
+        body { font-family: 'Segoe UI', sans-serif; padding: 40px; background-color: #f1f3f6; color: #333; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        
+        h1 { text-align: center; color: #2874f0; margin-bottom: 5px; }
+        .total-box { text-align: center; font-size: 1.4em; font-weight: bold; margin-bottom: 30px; color: #555; }
+        
+        .section { margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
+        .section h3 { margin-top: 0; color: #444; display: flex; align-items: center; gap: 10px; }
+        
+        /* Form Elements */
+        label { display: block; margin: 10px 0; cursor: pointer; font-size: 1.05em; }
+        input[type="radio"] { transform: scale(1.2); margin-right: 10px; }
+        textarea { width: 100%; height: 80px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-family: inherit; resize: none; }
+        
+        /* The Button */
+        .btn-confirm { 
+            background-color: #fb641b; 
+            color: white; 
+            border: none; 
+            padding: 15px; 
+            width: 100%; 
+            font-size: 1.3em; 
+            font-weight: bold; 
+            cursor: pointer; 
+            border-radius: 5px; 
+            transition: background 0.3s;
+            text-transform: uppercase;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
-
-        .box {
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-
-        h2 {
-            margin-top: 0;
-            color: #333;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-        }
-
-        label {
-            display: block;
-            margin: 10px 0;
-            cursor: pointer;
-        }
-
-        input[type="radio"] {
-            margin-right: 10px;
-        }
-
-        textarea {
-            width: 100%;
-            height: 80px;
-            padding: 10px;
-            margin-top: 10px;
-            box-sizing: border-box;
-        }
-
-        .total-price {
-            font-size: 1.5em;
-            font-weight: bold;
-            text-align: right;
-            margin-bottom: 20px;
-        }
-
-        .btn-confirm {
-            background-color: #fb641b;
-            color: white;
-            border: none;
-            padding: 15px;
-            width: 100%;
-            font-size: 1.2em;
-            cursor: pointer;
-            border-radius: 3px;
-        }
-
-        .btn-confirm:hover {
-            background-color: #e35a17;
-        }
+        .btn-confirm:hover { background-color: #e35a17; }
+        
+        .back-link { display: block; text-align: center; margin-top: 20px; color: #2874f0; text-decoration: none; }
     </style>
 </head>
-
 <body>
 
-    <h1 style="text-align: center;">Secure Checkout</h1>
+    <div class="container">
+        <h1>Secure Checkout</h1>
+        <div class="total-box">Total Payable: ₹{{ total }}</div>
 
-    <div class="total-price">Total to Pay: ₹{{ total }}</div>
+        <form action="/checkout" method="POST">
+            
+            <div class="section">
+                <h3>📍 Delivery Address</h3>
+                
+                {% if addresses %}
+                    <p style="color: #666; font-size: 0.9em; margin-bottom: 10px;">Select a saved address:</p>
+                    {% for addr in addresses %}
+                        <label>
+                            <input type="radio" name="selected_address" value="{{ addr }}">
+                            {{ addr }}
+                        </label>
+                    {% endfor %}
+                    <p style="text-align: center; color: #999;">- OR -</p>
+                {% endif %}
+                
+                <textarea name="new_address" placeholder="Type a new address here (Street, City, Pincode)..."></textarea>
+            </div>
 
-    <form action="/checkout" method="POST">
+            <div class="section" style="border-bottom: none;">
+                <h3>💳 Payment Method</h3>
+                <label>
+                    <input type="radio" name="payment_mode" value="UPI" checked> 
+                    UPI (Google Pay / PhonePe)
+                </label>
+                <label>
+                    <input type="radio" name="payment_mode" value="Card"> 
+                    Credit / Debit Card
+                </label>
+                <label>
+                    <input type="radio" name="payment_mode" value="COD"> 
+                    Cash on Delivery (COD)
+                </label>
+            </div>
 
-        <div class="box">
-            <h2>📍 Delivery Address</h2>
+            <button type="submit" class="btn-confirm">Place Order</button>
+        </form>
 
-            {% if addresses %}
-            <p><b>Choose saved address:</b></p>
-            {% for addr in addresses %}
-            <label>
-                <input type="radio" name="selected_address" value="{{ addr }}">
-                {{ addr }}
-            </label>
-            {% endfor %}
-            <hr>
-            {% endif %}
-
-            <p><b>Or add a new address:</b></p>
-            <textarea name="new_address" placeholder="Enter your full street address, city, and pincode..."></textarea>
-        </div>
-
-        <div class="box">
-            <h2>💳 Payment Mode</h2>
-            <label>
-                <input type="radio" name="payment_mode" value="UPI" checked> UPI (GPay / PhonePe)
-            </label>
-            <label>
-                <input type="radio" name="payment_mode" value="Credit/Debit Card"> Credit / Debit Card
-            </label>
-            <label>
-                <input type="radio" name="payment_mode" value="COD"> Cash on Delivery (COD)
-            </label>
-        </div>
-
-        <button type="submit" class="btn-confirm">Place Order</button>
-    </form>
-
-    <br>
-    <a href="/cart">Back to Cart</a>
-
-</body>
-
-</html>
-<!DOCTYPE html>
-<html>
-
-<head>
-    <title>Checkout</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            padding: 30px;
-            max-width: 600px;
-            margin: auto;
-            background-color: #f1f3f6;
-        }
-
-        .box {
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-
-        h2 {
-            margin-top: 0;
-            color: #333;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-        }
-
-        label {
-            display: block;
-            margin: 10px 0;
-            cursor: pointer;
-        }
-
-        input[type="radio"] {
-            margin-right: 10px;
-        }
-
-        textarea {
-            width: 100%;
-            height: 80px;
-            padding: 10px;
-            margin-top: 10px;
-            box-sizing: border-box;
-        }
-
-        .total-price {
-            font-size: 1.5em;
-            font-weight: bold;
-            text-align: right;
-            margin-bottom: 20px;
-        }
-
-        .btn-confirm {
-            background-color: #fb641b;
-            color: white;
-            border: none;
-            padding: 15px;
-            width: 100%;
-            font-size: 1.2em;
-            cursor: pointer;
-            border-radius: 3px;
-        }
-
-        .btn-confirm:hover {
-            background-color: #e35a17;
-        }
-    </style>
-</head>
-
-<body>
-
-    <h1 style="text-align: center;">Secure Checkout</h1>
-
-    <div class="total-price">Total to Pay: ₹{{ total }}</div>
-
-    <form action="/checkout" method="POST">
-
-        <div class="box">
-            <h2>📍 Delivery Address</h2>
-
-            {% if addresses %}
-            <p><b>Choose saved address:</b></p>
-            {% for addr in addresses %}
-            <label>
-                <input type="radio" name="selected_address" value="{{ addr }}">
-                {{ addr }}
-            </label>
-            {% endfor %}
-            <hr>
-            {% endif %}
-
-            <p><b>Or add a new address:</b></p>
-            <textarea name="new_address" placeholder="Enter your full street address, city, and pincode..."></textarea>
-        </div>
-
-        <div class="box">
-            <h2>💳 Payment Mode</h2>
-            <label>
-                <input type="radio" name="payment_mode" value="UPI" checked> UPI (GPay / PhonePe)
-            </label>
-            <label>
-                <input type="radio" name="payment_mode" value="Credit/Debit Card"> Credit / Debit Card
-            </label>
-            <label>
-                <input type="radio" name="payment_mode" value="COD"> Cash on Delivery (COD)
-            </label>
-        </div>
-
-        <button type="submit" class="btn-confirm">Place Order</button>
-    </form>
-
-    <br>
-    <a href="/cart">Back to Cart</a>
+        <a href="/cart" class="back-link">← Cancel and go back to Cart</a>
+    </div>
 
 </body>
-
 </html>
